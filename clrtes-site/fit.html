@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLRTES | Avatar</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .avatar-shell{
+      max-width:1200px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap:24px;
+      padding:20px;
+    }
+
+    .avatar-stage{
+      position:relative;
+      min-height:520px;
+      border-radius:20px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 20%),
+        linear-gradient(180deg, #0b0b0b 0%, #050505 100%);
+      border:1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+    }
+
+    #avatarCanvas{
+      width:100%;
+      height:520px;
+    }
+
+    .avatar-info{
+      padding:28px 24px;
+      border-radius:20px;
+      background: linear-gradient(180deg, rgba(35,35,35,0.95), rgba(12,12,12,0.95));
+      border:1px solid rgba(255,255,255,0.07);
+      box-shadow:0 15px 30px rgba(0,0,0,0.35);
+      height:fit-content;
+    }
+
+    .avatar-info h2{
+      color:#f1f1f1;
+      margin-bottom:14px;
+      font-size:2rem;
+    }
+
+    .avatar-info p{
+      color:#b9b9b9;
+      line-height:1.7;
+      margin-bottom:20px;
+    }
+
+    .reward-rules{
+      display:grid;
+      gap:14px;
+      margin:22px 0 26px;
+    }
+
+    .reward-box{
+      padding:16px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.06);
+    }
+
+    .reward-box strong{
+      display:block;
+      color:#f3f3f3;
+      font-size:1.1rem;
+      margin-bottom:6px;
+    }
+
+    .reward-box span{
+      color:#b9b9b9;
+    }
+
+    .avatar-buttons{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:22px;
+    }
+
+    .avatar-hint{
+      position:absolute;
+      left:16px;
+      bottom:16px;
+      z-index:4;
+      padding:10px 14px;
+      border-radius:12px;
+      background:rgba(0,0,0,0.52);
+      color:#d8d8d8;
+      font-size:0.92rem;
+    }
+
+    .portal-overlay{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:radial-gradient(circle, rgba(25,25,25,0.25), rgba(0,0,0,0.92));
+      z-index:200;
+      overflow:hidden;
+    }
+
+    .portal-overlay.active{
+      display:flex;
+    }
+
+    .portal-ring{
+      position:absolute;
+      width:160px;
+      height:160px;
+      border-radius:50%;
+      border:2px solid rgba(255,255,255,0.18);
+      box-shadow:
+        0 0 30px rgba(255,255,255,0.08),
+        inset 0 0 30px rgba(255,255,255,0.04);
+      animation: portalExpand 1.3s ease forwards;
+    }
+
+    .portal-ring::before,
+    .portal-ring::after{
+      content:"";
+      position:absolute;
+      inset:12px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,0.12);
+    }
+
+    .portal-ring::after{
+      inset:28px;
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    .portal-text{
+      position:relative;
+      z-index:3;
+      color:#f1f1f1;
+      font-size:1.2rem;
+      letter-spacing:0.12rem;
+      opacity:0;
+      animation: portalTextIn 0.5s ease 0.25s forwards;
+      text-align:center;
+    }
+
+    @keyframes portalExpand{
+      0%{
+        transform:scale(0.3);
+        opacity:0.2;
+      }
+      35%{
+        opacity:1;
+      }
+      100%{
+        transform:scale(12);
+        opacity:1;
+      }
+    }
+
+    @keyframes portalTextIn{
+      from{
+        opacity:0;
+        transform:translateY(12px);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    @media (max-width: 980px){
+      .avatar-shell{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+
+<body class="fit-body">
+  <div class="bg-overlay"></div>
+
+  <nav class="top-nav fit-nav">
+    <div class="brand-small">CLRTES</div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="runner.html">Runner</a>
+      <a href="https://t.me/Mysmsverification_bot" target="_blank">Telegram Bot</a>
+    </div>
+  </nav>
+
+  <main class="fit-page">
+    <section class="fit-hero">
+      <h1 class="logo-text fit-logo">CLRTES</h1>
+      <p class="fit-subtitle">
+        Prepare your avatar. Enter the runner. Win rewards.
+      </p>
+    </section>
+
+    <section class="avatar-shell">
+      <div class="avatar-stage">
+        <div id="avatarCanvas"></div>
+        <div class="avatar-hint">Drag to rotate • Scroll to zoom</div>
+      </div>
+
+      <div class="avatar-info">
+        <h2>Runner Rewards</h2>
+
+        <p>
+          Preview your avatar, rotate it from different angles, then enter the runner game and collect coins.
+        </p>
+
+        <div class="reward-rules">
+          <div class="reward-box">
+            <strong>1000 coins</strong>
+            <span>= ₵1 reward</span>
+          </div>
+
+          <div class="reward-box">
+            <strong>10000 coins</strong>
+            <span>= ₵10 reward</span>
+          </div>
+        </div>
+
+        <div class="avatar-buttons">
+          <button id="startRunnerBtn" class="btn primary-btn" type="button">
+            Start Runner Game
+          </button>
+
+          <a href="https://t.me/Mysmsverification_bot" target="_blank" class="btn secondary-btn">
+            Open Telegram Bot
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="portalOverlay" class="portal-overlay">
+    <div class="portal-ring"></div>
+    <div class="portal-text">Entering Runner...</div>
+  </div>
+
+  <script type="module">
+    import * as THREE from "https://esm.sh/three@0.179.1";
+    import { GLTFLoader } from "https://esm.sh/three@0.179.1/examples/jsm/loaders/GLTFLoader.js";
+
+    const container = document.getElementById("avatarCanvas");
+    const startRunnerBtn = document.getElementById("startRunnerBtn");
+    const portalOverlay = document.getElementById("portalOverlay");
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x080808);
+
+    const camera = new THREE.PerspectiveCamera(
+      45,
+      container.clientWidth / 520,
+      0.1,
+      1000
+    );
+    camera.position.set(0, 2.2, 5);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, 520);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const ambient = new THREE.AmbientLight(0xffffff, 1.7);
+    scene.add(ambient);
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2);
+    keyLight.position.set(5, 8, 6);
+    scene.add(keyLight);
+
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    rimLight.position.set(0, 5, -6);
+    scene.add(rimLight);
+
+    const floor = new THREE.Mesh(
+      new THREE.CircleGeometry(4.5, 64),
+      new THREE.MeshStandardMaterial({
+        color: 0x111111,
+        roughness: 0.92,
+        metalness: 0.08
+      })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.02;
+    scene.add(floor);
+
+    const loader = new GLTFLoader();
+
+    let avatar = null;
+    let mixer = null;
+    let baseY = 0;
+
+    let autoRotate = true;
+    let isDragging = false;
+    let previousX = 0;
+    let manualRotationY = Math.PI;
+    let zoomZ = 5;
+
+    loader.load(
+      "./assets/avatar.glb",
+      (gltf) => {
+        avatar = gltf.scene;
+        scene.add(avatar);
+
+        const box = new THREE.Box3().setFromObject(avatar);
+        const center = box.getCenter(new THREE.Vector3());
+
+        avatar.position.x -= center.x;
+        avatar.position.y -= center.y;
+        avatar.position.z -= center.z;
+
+        const size = box.getSize(new THREE.Vector3());
+        const scale = 2.3 / size.y;
+        avatar.scale.setScalar(scale);
+
+        const box2 = new THREE.Box3().setFromObject(avatar);
+        const center2 = box2.getCenter(new THREE.Vector3());
+        const size2 = box2.getSize(new THREE.Vector3());
+
+        avatar.position.x -= center2.x;
+        avatar.position.z -= center2.z;
+        avatar.position.y += -(center2.y - size2.y / 2);
+
+        baseY = avatar.position.y;
+        avatar.rotation.y = manualRotationY;
+
+        if (gltf.animations && gltf.animations.length > 0) {
+          mixer = new THREE.AnimationMixer(avatar);
+          const clip =
+            gltf.animations.find(a => a.name.toLowerCase().includes("idle")) ||
+            gltf.animations[0];
+          const action = mixer.clipAction(clip);
+          action.play();
+        }
+      },
+      undefined,
+      (error) => {
+        console.error("Avatar load error:", error);
+      }
+    );
+
+    renderer.domElement.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      autoRotate = false;
+      previousX = e.clientX;
+      renderer.domElement.style.cursor = "grabbing";
+    });
+
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
+      renderer.domElement.style.cursor = "grab";
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging || !avatar) return;
+      const delta = e.clientX - previousX;
+      manualRotationY += delta * 0.01;
+      previousX = e.clientX;
+    });
+
+    renderer.domElement.addEventListener("touchstart", (e) => {
+      if (!avatar) return;
+      autoRotate = false;
+      previousX = e.touches[0].clientX;
+    }, { passive: true });
+
+    renderer.domElement.addEventListener("touchmove", (e) => {
+      if (!avatar) return;
+      const currentX = e.touches[0].clientX;
+      const delta = currentX - previousX;
+      manualRotationY += delta * 0.01;
+      previousX = currentX;
+    }, { passive: true });
+
+    renderer.domElement.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      zoomZ += e.deltaY * 0.003;
+      zoomZ = Math.max(3.4, Math.min(7.2, zoomZ));
+    }, { passive: false });
+
+    startRunnerBtn.addEventListener("click", () => {
+      portalOverlay.classList.add("active");
+      setTimeout(() => {
+        window.location.href = "runner.html";
+      }, 1200);
+    });
+
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const delta = clock.getDelta();
+
+      if (mixer) {
+        mixer.update(delta);
+      }
+
+      if (avatar) {
+        if (autoRotate) {
+          manualRotationY += 0.003;
+        }
+
+        avatar.rotation.y = manualRotationY;
+        avatar.position.y = baseY + Math.sin(performance.now() * 0.0018) * 0.05;
+      }
+
+      camera.position.z += (zoomZ - camera.position.z) * 0.08;
+      camera.lookAt(0, 1.05, 0);
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener("resize", () => {
+      camera.aspect = container.clientWidth / 520;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, 520);
+    });
+  </script>
+</body>
+</html>
