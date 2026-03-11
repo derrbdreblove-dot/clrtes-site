@@ -1,119 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CLRTES | Runner</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Run & Win Rewards</title>
+
+<style>
+
+body{
+margin:0;
+background:#050505;
+color:white;
+font-family:Arial,Helvetica,sans-serif;
+text-align:center;
+overflow:hidden;
+}
+
+#runnerCanvasWrap{
+width:100%;
+height:700px;
+position:relative;
+}
+
+#runnerCanvas{
+width:100%;
+height:700px;
+}
+
+#topUI{
+position:absolute;
+top:15px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:20px;
+font-size:18px;
+background:rgba(0,0,0,0.6);
+padding:10px 20px;
+border-radius:10px;
+}
+
+#runnerHint{
+position:absolute;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+font-size:14px;
+opacity:.8;
+}
+
+#startPanel{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:rgba(0,0,0,0.8);
+padding:30px;
+border-radius:12px;
+}
+
+#startBtn{
+padding:12px 25px;
+font-size:18px;
+border:none;
+border-radius:6px;
+background:#1da1f2;
+color:white;
+cursor:pointer;
+}
+
+#gameOverPanel{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:rgba(0,0,0,0.9);
+padding:30px;
+border-radius:12px;
+display:none;
+}
+
+#restartBtn{
+padding:10px 20px;
+margin-top:10px;
+border:none;
+background:#1da1f2;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+#rewardPopup{
+position:absolute;
+top:100px;
+left:50%;
+transform:translateX(-50%);
+background:#111;
+padding:15px 20px;
+border-radius:8px;
+display:none;
+}
+
+#claimOverlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.9);
+display:none;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+}
+
+#claimOverlay button{
+margin-top:20px;
+padding:10px 20px;
+border:none;
+background:#1da1f2;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+#musicToggle{
+position:absolute;
+top:20px;
+right:20px;
+padding:8px 14px;
+background:#111;
+border:none;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+</style>
 </head>
-<body class="fit-body">
-  <div class="bg-overlay"></div>
 
-  <nav class="top-nav fit-nav">
-    <div class="brand-small">CLRTES</div>
-    <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="fit.html">Avatar</a>
-      <a href="https://t.me/Mysmsverification_bot" target="_blank">Telegram Bot</a>
-    </div>
-  </nav>
+<body>
 
-  <main class="runner-page">
-    <section class="fit-hero">
-      <h1 class="logo-text fit-logo">CLRTES RUN</h1>
-      <p class="fit-subtitle">Collect coins. Dodge obstacles. Earn rewards.</p>
-    </section>
+<div id="runnerCanvasWrap">
 
-    <section class="runner-shell">
-      <div class="runner-ui">
-        <div class="runner-stat">
-          <span>Score</span>
-          <strong id="score">0</strong>
-        </div>
-        <div class="runner-stat">
-          <span>Coins</span>
-          <strong id="coins">0</strong>
-        </div>
-        <div class="runner-stat">
-          <span>Best</span>
-          <strong id="bestScore">0</strong>
-        </div>
-        <div class="runner-stat">
-          <span>Value</span>
-          <strong id="rewardValue">₵0</strong>
-        </div>
-        <div class="runner-stat">
-          <span>Data Gifts</span>
-          <strong id="dataGifts">0</strong>
-        </div>
-        <button id="musicToggle" class="btn secondary-btn" type="button">Mute Music</button>
-      </div>
+<div id="runnerCanvas"></div>
 
-      <div id="runnerCanvasWrap">
-        <div id="runnerCanvas"></div>
+<button id="musicToggle">Mute Music</button>
 
-        <div id="runnerHint">
-          A / D or Left / Right to switch lanes
-        </div>
+<div id="topUI">
+<div>Score: <span id="score">0</span></div>
+<div>Coins: <span id="coins">0</span></div>
+<div>Reward: <span id="rewardValue">₵0</span></div>
+<div>Data: <span id="dataGifts">0</span></div>
+</div>
 
-        <div id="startPanel">
-          <h2>CLRTES RUN</h2>
-          <p>Collect coins and convert them into rewards for the Telegram bot.</p>
-          <p><strong>1000 coins = ₵1</strong> &nbsp; | &nbsp; <strong>10000 coins = ₵10</strong></p>
-          <p><strong>Rare Bonus:</strong> 100MB data gifts appear only in the hardest sections.</p>
-          <div class="runner-panel-buttons">
-            <button id="startBtn" class="btn primary-btn" type="button">Start Game</button>
-            <a href="https://t.me/Mysmsverification_bot" target="_blank" class="btn secondary-btn">
-              Open Telegram Bot
-            </a>
-          </div>
-        </div>
+<div id="runnerHint">
+Swipe left or right on mobile • A / D or Arrow keys on desktop
+</div>
 
-        <div id="rewardPopup">
-          <h3>Reward Progress</h3>
-          <p id="rewardText">Keep collecting coins.</p>
-          <button id="claimRewardBtn" class="btn primary-btn" type="button">
-            Claim Reward
-          </button>
-        </div>
+<div id="startPanel">
+<h2>Run & Win Rewards</h2>
+<p>Collect coins and rare data gifts</p>
+<button id="startBtn">Start Run</button>
+</div>
 
-        <div id="gameOverPanel">
-          <h2>Game Over</h2>
-          <p>Your score: <span id="finalScore">0</span></p>
-          <p>Your coins: <span id="finalCoins">0</span></p>
-          <p>Reward value: <span id="finalRewardValue">₵0</span></p>
-          <p>100MB data gifts: <span id="finalDataGifts">0</span></p>
-          <div class="runner-panel-buttons">
-            <button id="restartBtn" class="btn primary-btn" type="button">Play Again</button>
-            <button id="redeemRewardBtn" class="btn secondary-btn" type="button">
-              Redeem in Bot
-            </button>
-          </div>
-        </div>
+<div id="gameOverPanel">
+<h2>Game Over</h2>
 
-        <div id="claimOverlay">
-          <div class="claim-box">
-            <h2>Rewards Coming Soon</h2>
-            <p>Support directly to help you claim rewards.</p>
-            <p>Opening Telegram bot in <span id="claimCountdown">10</span> seconds...</p>
-            <div class="runner-panel-buttons">
-              <a href="https://t.me/Mysmsverification_bot" target="_blank" class="btn primary-btn" id="claimNowLink">
-                Open Now
-              </a>
-              <button id="closeClaimOverlay" class="btn secondary-btn" type="button">
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
+<p>Score: <span id="finalScore"></span></p>
+<p>Coins: <span id="finalCoins"></span></p>
+<p>Reward Value: <span id="finalRewardValue"></span></p>
+<p>Data Gifts: <span id="finalDataGifts"></span></p>
 
-  <audio id="runnerMusic" loop preload="auto">
-    <source src="./assets/music/runner-music.mp3" type="audio/mpeg" />
-  </audio>
+<p>Best Score: <span id="bestScore">0</span></p>
 
-  <script type="module" src="runner.js"></script>
+<button id="restartBtn">Play Again</button>
+
+<br><br>
+
+<button id="claimRewardBtn">Claim Reward</button>
+</div>
+
+<div id="rewardPopup">
+<span id="rewardText"></span>
+</div>
+
+<div id="claimOverlay">
+
+<h2>Rewards Coming Soon</h2>
+
+<p>
+Support will assist you in claiming your rewards.
+</p>
+
+<p>
+Opening Telegram bot in <span id="claimCountdown">10</span> seconds
+</p>
+
+<button id="closeClaimOverlay">Cancel</button>
+
+</div>
+
+</div>
+
+<audio id="runnerMusic" loop>
+<source src="assets/music.mp3" type="audio/mpeg">
+</audio>
+
+<script type="module" src="runner.js"></script>
+
 </body>
 </html>
