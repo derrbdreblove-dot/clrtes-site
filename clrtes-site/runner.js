@@ -63,6 +63,12 @@ let musicMuted = false;
 let currentAvatarMode = "preview";
 let currentLoadToken = 0;
 
+// Touch / swipe control
+let touchStartX = 0;
+let touchStartY = 0;
+let touchActive = false;
+const SWIPE_THRESHOLD = 40;
+
 const previewCameraBase = { x: 0, y: 2.35, z: 5.8 };
 const runnerCameraBase = { x: 0, y: 2.6, z: 6.7 };
 
@@ -103,6 +109,14 @@ function init() {
 
   window.addEventListener("resize", onResize);
   window.addEventListener("keydown", onKeyDown);
+
+  // Touch controls
+  const touchTarget = document.getElementById("runnerCanvasWrap") || renderer.domElement;
+
+  touchTarget.addEventListener("touchstart", onTouchStart, { passive: true });
+  touchTarget.addEventListener("touchmove", onTouchMove, { passive: false });
+  touchTarget.addEventListener("touchend", onTouchEnd, { passive: true });
+
   restartBtn.addEventListener("click", restartGame);
   startBtn.addEventListener("click", startGame);
   claimRewardBtn.addEventListener("click", openClaimOverlay);
@@ -289,18 +303,66 @@ function loadRunnerAvatar(onDone = null) {
   loadAvatar(RUNNER_AVATAR_PATH, "runner", onDone);
 }
 
+function moveLeft() {
+  targetLane = Math.max(0, targetLane - 1);
+}
+
+function moveRight() {
+  targetLane = Math.min(2, targetLane + 1);
+}
+
 function onKeyDown(e) {
   if (!gameRunning) return;
 
   const key = e.key.toLowerCase();
 
   if (key === "arrowleft" || key === "a") {
-    targetLane = Math.max(0, targetLane - 1);
+    moveLeft();
   }
 
   if (key === "arrowright" || key === "d") {
-    targetLane = Math.min(2, targetLane + 1);
+    moveRight();
   }
+}
+
+function onTouchStart(e) {
+  if (!gameRunning) return;
+  if (!e.touches || e.touches.length === 0) return;
+
+  touchActive = true;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}
+
+function onTouchMove(e) {
+  if (!gameRunning || !touchActive) return;
+  if (!e.touches || e.touches.length === 0) return;
+
+  const currentX = e.touches[0].clientX;
+  const currentY = e.touches[0].clientY;
+
+  const deltaX = currentX - touchStartX;
+  const deltaY = currentY - touchStartY;
+
+  // Only react to horizontal swipes
+  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
+    e.preventDefault();
+
+    if (deltaX > 0) {
+      moveRight();
+    } else {
+      moveLeft();
+    }
+
+    // Reset so one long swipe doesn't move multiple times too fast
+    touchStartX = currentX;
+    touchStartY = currentY;
+    touchActive = false;
+  }
+}
+
+function onTouchEnd() {
+  touchActive = false;
 }
 
 function spawnObstacle() {
@@ -838,6 +900,7 @@ function startGame() {
   rewardMilestonesShown.clear();
   rewardPopup.style.display = "none";
   targetLane = 1;
+  touchActive = false;
 
   scoreEl.textContent = "0";
   coinsEl.textContent = "0";
@@ -884,6 +947,7 @@ function restartGame() {
   targetLane = 1;
   rewardMilestonesShown.clear();
   rewardPopup.style.display = "none";
+  touchActive = false;
 
   scoreEl.textContent = "0";
   coinsEl.textContent = "0";
